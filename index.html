@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard อุบัติเหตุทางถนน 2566–2568</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --ink:#08090D;--ink2:#0F1219;--ink3:#161B27;--ink4:#1C2233;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);
+  --red:#E8294A;--amber:#F5A623;--teal:#00D4AA;--slate:#5B8EBF;--violet:#8B5CF6;
+  --text:#DDE4F0;--muted:#5A6680;--dim:#2E3A52;--gold:#C9A84C;--gold2:#E8C97A;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'IBM Plex Sans Thai',sans-serif;background:var(--ink);color:var(--text);min-height:100vh;overflow-x:hidden;}
+.ambient{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 70% 50% at 15% 0%,rgba(232,41,74,0.055) 0%,transparent 55%),radial-gradient(ellipse 50% 40% at 85% 95%,rgba(0,212,170,0.04) 0%,transparent 50%);}
+.shell{position:relative;z-index:1;display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{width:215px;flex-shrink:0;background:var(--ink2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:hidden;}
+.sidebar-top{padding:24px 20px 18px;border-bottom:1px solid var(--border);}
+.sidebar-badge{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.sbl{width:18px;height:1px;background:linear-gradient(90deg,var(--gold),transparent);}
+.sidebar-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:900;line-height:1.25;color:#fff;}
+.sidebar-title em{font-style:normal;background:linear-gradient(135deg,var(--red),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sidebar-desc{margin-top:7px;font-size:11px;color:var(--muted);line-height:1.55;}
+.sidebar-yr{padding:14px 18px;border-bottom:1px solid var(--border);}
+.syr-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:9px;}
+.yr-btns{display:flex;flex-wrap:wrap;gap:5px;}
+.yr-btn{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:5px 11px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .2s cubic-bezier(.22,1,.36,1);}
+.yr-btn:hover{border-color:var(--border2);color:var(--text);}
+.yr-btn.active{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 0 14px rgba(232,41,74,0.3);}
+.yr-btn[data-yr="2567"].active{background:var(--amber);border-color:var(--amber);color:#111;}
+.yr-btn[data-yr="2568"].active{background:var(--slate);border-color:var(--slate);color:#fff;}
+.sidebar-nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:3px;overflow-y:auto;}
+.nav-sec-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);padding:8px 8px 4px;}
+.ntab{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:11px;border:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer;font-size:12.5px;font-weight:500;transition:all .2s cubic-bezier(.22,1,.36,1);text-align:left;width:100%;}
+.ntab:hover{background:var(--ink3);color:var(--text);border-color:var(--border);}
+.ntab.active{background:var(--ink4);color:var(--text);border-color:var(--border2);}
+.ntab.active .niw{background:rgba(232,41,74,0.15);border-color:rgba(232,41,74,0.3);}
+.niw{width:30px;height:30px;border-radius:8px;flex-shrink:0;background:var(--ink3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s;}
+.ntxt{display:flex;flex-direction:column;gap:1px;}
+.nnm{font-size:12px;font-weight:600;line-height:1;}
+.nen{font-size:9.5px;color:var(--dim);font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;margin-top:2px;}
+.ntab.active .nen{color:var(--muted);}
+.sidebar-footer{padding:12px 18px;border-top:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:0.5px;line-height:1.7;}
+.ld{display:inline-block;width:5px;height:5px;background:var(--teal);border-radius:50%;animation:blink 2.2s infinite;vertical-align:middle;margin-right:3px;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
+
+/* MAIN */
+.main{flex:1;min-width:0;padding:26px 26px 36px;}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+.phl{display:flex;align-items:center;gap:12px;}
+.phi{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:19px;border:1px solid var(--border);background:var(--ink3);flex-shrink:0;}
+.pht{font-family:'Playfair Display',serif;font-size:21px;font-weight:900;color:#fff;line-height:1.1;}
+.phs{font-size:11.5px;color:var(--muted);margin-top:3px;}
+.phb{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:6px 15px;border-radius:100px;background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.2);color:var(--teal);letter-spacing:0.5px;}
+
+/* TAB VIEWS */
+.tab-view{display:none;}
+.tab-view.active{display:block;animation:tabIn .32s cubic-bezier(.22,1,.36,1);}
+@keyframes tabIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* GRID */
+.g{display:grid;gap:13px;margin-bottom:13px;}
+.g.c4{grid-template-columns:repeat(4,1fr);}
+.g.c2{grid-template-columns:1fr 1fr;}
+.g.c3{grid-template-columns:1fr 1fr 1fr;}
+.g.c21{grid-template-columns:1.65fr 1fr;}
+.g.c31{grid-template-columns:1.3fr 0.7fr;}
+.g.c1{grid-template-columns:1fr;}
+
+/* KPI */
+.kpi{background:var(--ink2);border:1px solid var(--border);border-radius:17px;padding:18px 18px 14px;position:relative;overflow:hidden;cursor:default;transition:border-color .22s,transform .22s;}
+.kpi:hover{border-color:var(--border2);transform:translateY(-2px);}
+.kpi::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 85% 15%,var(--glow,rgba(255,255,255,0.02)) 0%,transparent 55%);}
+.kpi.r{--glow:rgba(232,41,74,0.16);border-top:2px solid var(--red);}
+.kpi.a{--glow:rgba(245,166,35,0.14);border-top:2px solid var(--amber);}
+.kpi.t{--glow:rgba(0,212,170,0.11);border-top:2px solid var(--teal);}
+.kpi.s{--glow:rgba(91,142,191,0.11);border-top:2px solid var(--slate);}
+.kpi.v{--glow:rgba(139,92,246,0.11);border-top:2px solid var(--violet);}
+.kic{font-size:16px;margin-bottom:9px;display:block;}
+.kn{font-family:'IBM Plex Mono',monospace;font-size:clamp(20px,2.2vw,28px);font-weight:600;line-height:1;margin-bottom:4px;letter-spacing:-0.5px;transition:all .28s cubic-bezier(.22,1,.36,1);}
+.kpi.r .kn{color:var(--red);} .kpi.a .kn{color:var(--amber);}
+.kpi.t .kn{color:var(--teal);} .kpi.s .kn{color:var(--slate);}
+.kpi.v .kn{color:var(--violet);}
+.kl{font-size:11px;color:var(--muted);font-weight:500;line-height:1.4;}
+.ks{margin-top:9px;padding-top:9px;border-top:1px solid var(--border);font-size:9.5px;color:var(--dim);font-family:'IBM Plex Mono',monospace;transition:all .28s;}
+
+/* CARD */
+.card{background:var(--ink2);border:1px solid var(--border);border-radius:17px;padding:18px 20px;transition:border-color .22s;}
+.card:hover{border-color:var(--border2);}
+.ch{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;}
+.ct{font-size:10px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;color:var(--text);font-family:'IBM Plex Mono',monospace;}
+.ctag{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--dim);background:var(--ink3);border:1px solid var(--border);border-radius:6px;padding:2px 7px;letter-spacing:0.5px;}
+.cs{font-size:11px;color:var(--muted);margin-bottom:13px;line-height:1.5;}
+canvas{width:100%!important;}
+
+/* PROVINCE */
+.prov-list{display:flex;flex-direction:column;gap:7px;margin-top:4px;}
+.prov-row{display:grid;grid-template-columns:115px 1fr 48px;align-items:center;gap:8px;}
+.prov-name{font-size:11px;color:var(--muted);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.prov-track{height:7px;background:var(--ink3);border-radius:100px;overflow:hidden;}
+.prov-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--red),var(--amber));position:relative;transition:width .65s cubic-bezier(.22,1,.36,1);}
+.prov-fill::after{content:'';position:absolute;top:0;right:0;width:4px;height:100%;background:rgba(255,255,255,0.22);border-radius:100px;}
+.prov-val{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;text-align:right;color:var(--text);}
+
+/* GENDER */
+.gyblock{background:var(--ink3);border:1px solid var(--border);border-radius:12px;padding:12px 13px;margin-bottom:9px;}
+.gylbl{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--gold);letter-spacing:1px;margin-bottom:8px;font-weight:500;}
+.gbrow{display:flex;align-items:center;gap:7px;margin-bottom:4px;font-size:10.5px;}
+.glbl{width:28px;font-weight:600;font-family:'IBM Plex Mono',monospace;}
+.gtrack{flex:1;height:7px;background:rgba(255,255,255,0.04);border-radius:100px;overflow:hidden;}
+.gfill{height:100%;border-radius:100px;transition:width .6s cubic-bezier(.22,1,.36,1);}
+.gfill.m{background:linear-gradient(90deg,#5B8EBF,#7AACDB);}
+.gfill.f{background:linear-gradient(90deg,#C9A84C,#E8C97A);}
+.gpct{width:34px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;}
+.gpct.m{color:#7AACDB;} .gpct.f{color:#E8C97A;}
+
+/* DONUT */
+.dwrap{position:relative;width:115px;height:115px;flex-shrink:0;}
+.dcenter{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.dnum{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:var(--text);line-height:1;transition:all .3s;}
+.dsub{font-size:8px;color:var(--muted);margin-top:2px;}
+.dl-row{display:flex;align-items:center;gap:7px;font-size:11px;margin-bottom:7px;}
+.dl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.dl-name{flex:1;color:var(--muted);}
+.dl-val{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:10.5px;transition:all .28s;}
+
+/* INSIGHT */
+.insight{background:var(--ink3);border:1px solid var(--border);border-radius:13px;padding:13px 15px;margin-top:13px;}
+.insight-title{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+.insight-list{display:flex;flex-direction:column;gap:6px;}
+.insight-item{display:flex;align-items:flex-start;gap:8px;font-size:11px;color:var(--muted);line-height:1.55;}
+.idot{width:5px;height:5px;border-radius:50%;background:var(--red);flex-shrink:0;margin-top:4px;}
+
+/* ANIMATE */
+@keyframes numIn{from{opacity:0.3;transform:scale(0.95);}to{opacity:1;transform:scale(1);}}
+.num-anim{animation:numIn .3s cubic-bezier(.22,1,.36,1);}
+
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--dim);border-radius:100px;}
+
+@media(max-width:860px){
+  .sidebar{width:170px;}
+  .g.c4{grid-template-columns:repeat(2,1fr);}
+  .g.c2,.g.c3,.g.c21,.g.c31{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div class="ambient"></div>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-top">
+    <div class="sidebar-badge"><span class="sbl"></span>Road Safety</div>
+    <div class="sidebar-title">สถานการณ์<br><em>อุบัติเหตุ</em></div>
+    <div class="sidebar-desc">ผู้เสียชีวิตจากอุบัติเหตุ<br>ทางถนน พ.ศ. 2566–2568</div>
+  </div>
+  <div class="sidebar-yr">
+    <div class="syr-label">Filter ปี</div>
+    <div class="yr-btns">
+      <button class="yr-btn active" data-yr="all">ALL</button>
+      <button class="yr-btn" data-yr="2566">2566</button>
+      <button class="yr-btn" data-yr="2567">2567</button>
+      <button class="yr-btn" data-yr="2568">2568</button>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-sec-lbl">หัวข้อ</div>
+    <button class="ntab active" data-tab="overview"><div class="niw">📊</div><div class="ntxt"><span class="nnm">ภาพรวม</span><span class="nen">OVERVIEW</span></div></button>
+    <button class="ntab" data-tab="vehicle"><div class="niw">🏍</div><div class="ntxt"><span class="nnm">พาหนะ</span><span class="nen">VEHICLE</span></div></button>
+    <button class="ntab" data-tab="province"><div class="niw">📍</div><div class="ntxt"><span class="nnm">จังหวัด</span><span class="nen">PROVINCE</span></div></button>
+    <button class="ntab" data-tab="demo"><div class="niw">👥</div><div class="ntxt"><span class="nnm">ประชากร</span><span class="nen">DEMOGRAPHICS</span></div></button>
+  </nav>
+  <div class="sidebar-footer"><span class="ld"></span>LIVE DATA<br>E-claim / มรณบัตร<br>กระทรวงสาธารณสุข</div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="page-header">
+    <div class="phl">
+      <div class="phi" id="phIcon">📊</div>
+      <div><div class="pht" id="phTitle">ภาพรวมสถานการณ์</div><div class="phs" id="phSub">อุบัติเหตุทางถนน · รวม 3 ปี · 46,955 ราย</div></div>
+    </div>
+    <div class="phb" id="phBadge">ALL YEARS</div>
+  </div>
+
+  <!-- ── TAB: OVERVIEW ── -->
+  <div class="tab-view active" id="tab-overview">
+    <div class="g c4">
+      <div class="kpi r"><span class="kic">⚠️</span><div class="kn" id="ov-total">46,955</div><div class="kl">ผู้เสียชีวิตรวม</div><div class="ks" id="ov-total-s">AVG 15,652 ราย/ปี</div></div>
+      <div class="kpi a"><span class="kic">🏍</span><div class="kn" id="ov-moto">49.4%</div><div class="kl">สัดส่วนจักรยานยนต์</div><div class="ks" id="ov-moto-s">23,182 ราย</div></div>
+      <div class="kpi t"><span class="kic">👤</span><div class="kn" id="ov-male">76.5%</div><div class="kl">ผู้เสียชีวิตเพศชาย</div><div class="ks" id="ov-male-s">ชาย 35,938 · หญิง 11,016</div></div>
+      <div class="kpi s"><span class="kic">🗓</span><div class="kn">44 ปี</div><div class="kl">อายุเฉลี่ยผู้เสียชีวิต</div><div class="ks">IQR 27–60 ปี</div></div>
+    </div>
+    <div class="g c21">
+      <div class="card">
+        <div class="ch"><div class="ct">แนวโน้มรายเดือน</div><div class="ctag" id="ov-mtag">2566 vs 2567</div></div>
+        <div class="cs" id="ov-mdesc">ผู้เสียชีวิตรายเดือนเปรียบเทียบ ปี 2566 และ 2567</div>
+        <canvas id="ovMonthly" style="max-height:215px"></canvas>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ct">ยอดรวมรายปี</div><div class="ctag">TOTAL / YR</div></div>
+        <div class="cs">ผู้เสียชีวิตรวมแต่ละปี (* 2568 บางส่วน)</div>
+        <canvas id="ovYearly" style="max-height:215px"></canvas>
+      </div>
+    </div>
+    <div class="insight">
+      <div class="insight-title">Key Insights · ภาพรวม</div>
+      <div class="insight-list">
+        <div class="insight-item"><span class="idot"></span><span>ยอดผู้เสียชีวิตปี 2566 และ 2567 ใกล้เคียงกันมาก (17,498 vs 17,477) สะท้อนว่าแนวโน้มยังไม่ลดลง</span></div>
+        <div class="insight-item"><span class="idot"></span><span>ช่วงเดือน ม.ค.–ก.พ. มักมียอดสูงสุดในรอบปี สอดคล้องกับเทศกาลปีใหม่และตรุษจีน</span></div>
+        <div class="insight-item"><span class="idot"></span><span>รถจักรยานยนต์ครองสัดส่วนผู้เสียชีวิตสูงสุดในทุกปีที่ศึกษา มากกว่าประเภทอื่นรวมกัน</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: VEHICLE ── -->
+  <div class="tab-view" id="tab-vehicle">
+    <div class="g c4">
+      <div class="kpi r"><span class="kic">🏍</span><div class="kn" id="vh-moto">23,182</div><div class="kl">ผู้เสียชีวิตจากจักรยานยนต์</div><div class="ks" id="vh-moto-s">49.4% ของที่ระบุพาหนะ</div></div>
+      <div class="kpi a"><span class="kic">🚗</span><div class="kn" id="vh-car">2,765</div><div class="kl">ผู้เสียชีวิตจากรถยนต์</div><div class="ks" id="vh-car-s">5.9% ของที่ระบุพาหนะ</div></div>
+      <div class="kpi t"><span class="kic">🚶</span><div class="kn" id="vh-walk">1,047</div><div class="kl">ผู้เสียชีวิตคนเดินเท้า</div><div class="ks" id="vh-walk-s">2.2% ของที่ระบุพาหนะ</div></div>
+      <div class="kpi s"><span class="kic">🚛</span><div class="kn" id="vh-truck">678</div><div class="kl">ผู้เสียชีวิตรถบรรทุก/ตู้</div><div class="ks" id="vh-truck-s">1.4% ของที่ระบุพาหนะ</div></div>
+    </div>
+    <div class="g c21">
+      <div class="card">
+        <div class="ch"><div class="ct">จำนวนตามพาหนะ</div><div class="ctag" id="vh-btag">ALL YEARS</div></div>
+        <div class="cs">เปรียบเทียบผู้เสียชีวิตตามประเภทพาหนะแต่ละปี</div>
+        <canvas id="vhBar" style="max-height:225px"></canvas>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ct">สัดส่วนพาหนะ</div><div class="ctag" id="vh-dtag">BREAKDOWN</div></div>
+        <div class="cs" id="vh-ddesc">เฉพาะรายที่ระบุพาหนะ</div>
+        <div style="display:flex;gap:14px;align-items:center;margin-top:4px">
+          <div class="dwrap"><canvas id="vhDonut"></canvas><div class="dcenter"><div class="dnum" id="vhDTotal">28,496</div><div class="dsub">ราย</div></div></div>
+          <div style="flex:1">
+            <div class="dl-row"><span class="dl-dot" style="background:#E8294A"></span><span class="dl-name">รถจักรยานยนต์</span><span class="dl-val" style="color:#E8294A" id="vd-moto">23,182</span></div>
+            <div class="dl-row"><span class="dl-dot" style="background:#F5A623"></span><span class="dl-name">รถยนต์</span><span class="dl-val" style="color:#F5A623" id="vd-car">2,765</span></div>
+            <div class="dl-row"><span class="dl-dot" style="background:#00D4AA"></span><span class="dl-name">คนเดินเท้า</span><span class="dl-val" style="color:#00D4AA" id="vd-walk">1,047</span></div>
+            <div class="dl-row"><span class="dl-dot" style="background:#5B8EBF"></span><span class="dl-name">รถบรรทุก/ตู้</span><span class="dl-val" style="color:#5B8EBF" id="vd-truck">678</span></div>
+            <div class="dl-row"><span class="dl-dot" style="background:#C9A84C"></span><span class="dl-name">อื่นๆ</span><span class="dl-val" style="color:#C9A84C" id="vd-other">824</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="insight">
+      <div class="insight-title">Key Insights · พาหนะ</div>
+      <div class="insight-list">
+        <div class="insight-item"><span class="idot"></span><span>รถจักรยานยนต์คิดเป็น 49.4% ของผู้เสียชีวิตทั้งหมดที่ระบุพาหนะ สูงกว่าประเภทอื่นรวมกัน</span></div>
+        <div class="insight-item"><span class="idot"></span><span>จำนวนผู้เสียชีวิตจากรถจักรยานยนต์ลดลงจาก 9,489 (2566) เป็น 8,290 (2567) หรือลดลง ~12.6%</span></div>
+        <div class="insight-item"><span class="idot"></span><span>คนเดินเท้ามีสัดส่วนน้อยแต่เป็นกลุ่มเปราะบางที่สุด เนื่องจากไม่มีระบบป้องกัน</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: PROVINCE ── -->
+  <div class="tab-view" id="tab-province">
+    <div class="g c4">
+      <div class="kpi r"><span class="kic">🥇</span><div class="kn" id="pv-t1" style="font-size:18px">นครราชสีมา</div><div class="kl">อันดับ 1 สูงสุด</div><div class="ks" id="pv-t1s">1,978 ราย</div></div>
+      <div class="kpi a"><span class="kic">🥈</span><div class="kn" id="pv-t2" style="font-size:18px">กรุงเทพฯ</div><div class="kl">อันดับ 2 สูงสุด</div><div class="ks" id="pv-t2s">1,941 ราย</div></div>
+      <div class="kpi t"><span class="kic">🥉</span><div class="kn" id="pv-t3" style="font-size:18px">ชลบุรี</div><div class="kl">อันดับ 3 สูงสุด</div><div class="ks" id="pv-t3s">1,739 ราย</div></div>
+      <div class="kpi s"><span class="kic">📊</span><div class="kn" id="pv-total">46,955</div><div class="kl">ผู้เสียชีวิตรวม</div><div class="ks" id="pv-yrs">ปี 2566–2568</div></div>
+    </div>
+    <div class="g c21">
+      <div class="card">
+        <div class="ch"><div class="ct">10 จังหวัดสูงสุด</div><div class="ctag" id="pv-ltag">RANKING · ALL</div></div>
+        <div class="cs" id="pv-ldesc">จำแนกตามจังหวัดเกิดเหตุ</div>
+        <div class="prov-list" id="pvList"></div>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ct">Top 5 รายปี</div><div class="ctag" id="pv-btag">TOP5 × YEAR</div></div>
+        <div class="cs">5 จังหวัดอันดับต้น เปรียบเทียบแต่ละปี</div>
+        <canvas id="pvBar" style="max-height:255px"></canvas>
+      </div>
+    </div>
+    <div class="insight">
+      <div class="insight-title">Key Insights · จังหวัด</div>
+      <div class="insight-list">
+        <div class="insight-item"><span class="idot"></span><span>นครราชสีมา กรุงเทพฯ และชลบุรี ติด Top 3 ทุกปี สะท้อนความหนาแน่นของการจราจรและระยะทางถนน</span></div>
+        <div class="insight-item"><span class="idot"></span><span>จังหวัดในภาคตะวันออกเฉียงเหนือ (อีสาน) ครองหลายอันดับใน Top 10 สะท้อนปัญหาโครงสร้างถนน</span></div>
+        <div class="insight-item"><span class="idot"></span><span>ระยอง ชลบุรี ปทุมธานี เป็นพื้นที่อุตสาหกรรมที่มีการสัญจรของรถบรรทุกสูง</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: DEMOGRAPHICS ── -->
+  <div class="tab-view" id="tab-demo">
+    <div class="g c4">
+      <div class="kpi r"><span class="kic">👨</span><div class="kn" id="dm-male">76.5%</div><div class="kl">ผู้เสียชีวิตเพศชาย</div><div class="ks" id="dm-males">35,938 ราย</div></div>
+      <div class="kpi a"><span class="kic">🎯</span><div class="kn" id="dm-peak">16–25</div><div class="kl">กลุ่มอายุสูงสุด</div><div class="ks" id="dm-peaks">7,816 ราย</div></div>
+      <div class="kpi t"><span class="kic">📅</span><div class="kn">44 ปี</div><div class="kl">อายุเฉลี่ยผู้เสียชีวิต</div><div class="ks">IQR 27–60 ปี</div></div>
+      <div class="kpi s"><span class="kic">👴</span><div class="kn" id="dm-eld">7,442</div><div class="kl">ผู้เสียชีวิตอายุ 65+ ปี</div><div class="ks" id="dm-elds">รวมทุกปี</div></div>
+    </div>
+    <div class="g c2">
+      <div class="card">
+        <div class="ch"><div class="ct">กลุ่มอายุรายปี</div><div class="ctag" id="dm-atag">AGE · ALL</div></div>
+        <div class="cs">จำแนก 7 ช่วงอายุ เปรียบเทียบแต่ละปี</div>
+        <canvas id="dmAge" style="max-height:215px"></canvas>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ct">สัดส่วนกลุ่มอายุ</div><div class="ctag" id="dm-aptag">AGE PIE · ALL</div></div>
+        <div class="cs" id="dm-apdesc">สัดส่วนผู้เสียชีวิตจำแนกตามกลุ่มอายุ</div>
+        <canvas id="dmAgePie" style="max-height:215px"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">สัดส่วนเพศแต่ละปี</div><div class="ctag" id="dm-gtag">GENDER · ALL</div></div>
+      <div class="cs">เปรียบเทียบสัดส่วนชาย–หญิง ทุกปี</div>
+      <div id="dmGender" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-top:4px"></div>
+    </div>
+    <div class="insight">
+      <div class="insight-title">Key Insights · ประชากร</div>
+      <div class="insight-list">
+        <div class="insight-item"><span class="idot"></span><span>กลุ่มอายุ 16–25 ปี มีจำนวนผู้เสียชีวิตสูงสุด สะท้อนพฤติกรรมขับขี่เร็วและประสบการณ์น้อย</span></div>
+        <div class="insight-item"><span class="idot"></span><span>กลุ่ม 65+ ปี มีแนวโน้มเพิ่มขึ้นต่อเนื่อง สอดคล้องกับสังคมผู้สูงอายุของไทย</span></div>
+        <div class="insight-item"><span class="idot"></span><span>ผู้เสียชีวิตเพศชายสัดส่วน ~76–77% คงที่ทุกปี บ่งชี้พฤติกรรมเสี่ยงและการใช้รถจักรยานยนต์ที่สูงกว่า</span></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+const D={
+  all:{total:46955,moto:23182,car:2765,walk:1047,truck:678,other:824,male:35938,female:11016,maleR:'76.5%',motoR:'49.4%',spec:28496,
+    mo:{s:[{l:'2566',d:[649,639,574,581,589,552,558,543,556,525,572,587],c:'#E8294A',bg:'rgba(232,41,74,0.08)'},{l:'2567',d:[643,614,601,549,578,558,543,589,573,548,591,623],c:'#F5A623',bg:'rgba(245,166,35,0.07)'}]},
+    yr:{lb:['2566','2567','2568*'],d:[17498,17477,11980],bg:['rgba(232,41,74,0.82)','rgba(245,166,35,0.82)','rgba(91,142,191,0.65)'],bc:['#E8294A','#F5A623','#5B8EBF']},
+    vb:{s:[{l:'2566',d:[9489,1058,385,374,75,38,11,9],c:'rgba(232,41,74,0.8)'},{l:'2567',d:[8290,992,382,188,212,38,42,29],c:'rgba(245,166,35,0.8)'},{l:'2568',d:[5403,715,280,116,137,19,19,6],c:'rgba(91,142,191,0.7)'}]},
+    ag:{s:[{l:'2566',d:[987,3086,2789,2561,2685,2609,2672],c:'rgba(232,41,74,0.8)'},{l:'2567',d:[1034,2838,2809,2481,2625,2690,2725],c:'rgba(245,166,35,0.8)'},{l:'2568',d:[650,1892,1776,1603,1869,1937,2045],c:'rgba(91,142,191,0.7)'}]},
+    ap:[3671,7816,7374,6645,7179,7236,7442],
+    gd:[{yr:'2566',tot:17498,m:13463,f:4035,mp:76.9,fp:23.1},{yr:'2567',tot:17477,m:13399,f:4077,mp:76.7,fp:23.3},{yr:'2568 *',tot:11980,m:9076,f:2904,mp:75.8,fp:24.2}],
+    pv:[{n:'นครราชสีมา',v:1978},{n:'กรุงเทพมหานคร',v:1941},{n:'ชลบุรี',v:1739},{n:'เชียงใหม่',v:1560},{n:'ระยอง',v:1247},{n:'อุบลราชธานี',v:1230},{n:'ขอนแก่น',v:1223},{n:'เชียงราย',v:1121},{n:'ปทุมธานี',v:994},{n:'สงขลา',v:984}],
+    pb:{lb:['นครราชสีมา','กรุงเทพฯ','ชลบุรี','เชียงใหม่','ระยอง'],s:[{l:'2566',d:[734,806,695,616,486],c:'rgba(232,41,74,0.8)'},{l:'2567',d:[758,675,604,558,412],c:'rgba(245,166,35,0.8)'},{l:'2568',d:[486,460,440,386,349],c:'rgba(91,142,191,0.7)'}]},
+    badge:'ALL YEARS',note:'รวม 3 ปี'},
+  2566:{total:17498,moto:9489,car:1058,walk:385,truck:374,other:133,male:13463,female:4035,maleR:'76.9%',motoR:'82.5%',spec:11439,
+    mo:{s:[{l:'2566',d:[649,639,574,581,589,552,558,543,556,525,572,587],c:'#E8294A',bg:'rgba(232,41,74,0.1)'}]},
+    yr:{lb:['2566'],d:[17498],bg:['rgba(232,41,74,0.82)'],bc:['#E8294A']},
+    vb:{s:[{l:'2566',d:[9489,1058,385,374,75,38,11,9],c:'rgba(232,41,74,0.82)'}]},
+    ag:{s:[{l:'2566',d:[987,3086,2789,2561,2685,2609,2672],c:'rgba(232,41,74,0.82)'}]},
+    ap:[987,3086,2789,2561,2685,2609,2672],
+    gd:[{yr:'2566',tot:17498,m:13463,f:4035,mp:76.9,fp:23.1}],
+    pv:[{n:'กรุงเทพมหานคร',v:806},{n:'นครราชสีมา',v:734},{n:'ชลบุรี',v:695},{n:'เชียงใหม่',v:616},{n:'ระยอง',v:486},{n:'อุบลราชธานี',v:462},{n:'ขอนแก่น',v:450},{n:'เชียงราย',v:430},{n:'ปทุมธานี',v:394},{n:'สงขลา',v:382}],
+    pb:{lb:['กรุงเทพฯ','นครราชสีมา','ชลบุรี','เชียงใหม่','ระยอง'],s:[{l:'2566',d:[806,734,695,616,486],c:'rgba(232,41,74,0.82)'}]},
+    badge:'2566',note:'ปี 2566'},
+  2567:{total:17477,moto:8290,car:992,walk:382,truck:188,other:392,male:13399,female:4077,maleR:'76.7%',motoR:'80.9%',spec:10244,
+    mo:{s:[{l:'2567',d:[643,614,601,549,578,558,543,589,573,548,591,623],c:'#F5A623',bg:'rgba(245,166,35,0.1)'}]},
+    yr:{lb:['2567'],d:[17477],bg:['rgba(245,166,35,0.82)'],bc:['#F5A623']},
+    vb:{s:[{l:'2567',d:[8290,992,382,188,212,38,42,29],c:'rgba(245,166,35,0.82)'}]},
+    ag:{s:[{l:'2567',d:[1034,2838,2809,2481,2625,2690,2725],c:'rgba(245,166,35,0.82)'}]},
+    ap:[1034,2838,2809,2481,2625,2690,2725],
+    gd:[{yr:'2567',tot:17477,m:13399,f:4077,mp:76.7,fp:23.3}],
+    pv:[{n:'นครราชสีมา',v:758},{n:'กรุงเทพมหานคร',v:675},{n:'ชลบุรี',v:604},{n:'เชียงใหม่',v:558},{n:'อุบลราชธานี',v:490},{n:'ขอนแก่น',v:462},{n:'เชียงราย',v:421},{n:'ระยอง',v:412},{n:'สงขลา',v:396},{n:'ปทุมธานี',v:384}],
+    pb:{lb:['นครราชสีมา','กรุงเทพฯ','ชลบุรี','เชียงใหม่','อุบลราชธานี'],s:[{l:'2567',d:[758,675,604,558,490],c:'rgba(245,166,35,0.82)'}]},
+    badge:'2567',note:'ปี 2567'},
+  2568:{total:11980,moto:5403,car:715,walk:280,truck:116,other:234,male:9076,female:2904,maleR:'75.8%',motoR:'80.1%',spec:6748,
+    mo:{s:[{l:'2568 (บางส่วน)',d:[null,null,null,null,null,null,null,null,null,null,null,null],c:'#5B8EBF',bg:'rgba(91,142,191,0.08)'}]},
+    yr:{lb:['2568*'],d:[11980],bg:['rgba(91,142,191,0.7)'],bc:['#5B8EBF']},
+    vb:{s:[{l:'2568',d:[5403,715,280,116,137,19,19,6],c:'rgba(91,142,191,0.75)'}]},
+    ag:{s:[{l:'2568',d:[650,1892,1776,1603,1869,1937,2045],c:'rgba(91,142,191,0.78)'}]},
+    ap:[650,1892,1776,1603,1869,1937,2045],
+    gd:[{yr:'2568 (บางส่วน)',tot:11980,m:9076,f:2904,mp:75.8,fp:24.2}],
+    pv:[{n:'นครราชสีมา',v:486},{n:'กรุงเทพมหานคร',v:460},{n:'ชลบุรี',v:440},{n:'เชียงใหม่',v:386},{n:'ระยอง',v:349},{n:'อุบลราชธานี',v:278},{n:'ขอนแก่น',v:311},{n:'เชียงราย',v:270},{n:'ปทุมธานี',v:216},{n:'สงขลา',v:206}],
+    pb:{lb:['นครราชสีมา','กรุงเทพฯ','ชลบุรี','เชียงใหม่','ระยอง'],s:[{l:'2568',d:[486,460,440,386,349],c:'rgba(91,142,191,0.78)'}]},
+    badge:'2568 *',note:'ปี 2568 (บางส่วน)'}
+};
+
+Chart.defaults.font.family="'IBM Plex Sans Thai',sans-serif";
+Chart.defaults.color='#5A6680';
+Chart.defaults.plugins.legend.labels.usePointStyle=true;
+Chart.defaults.plugins.legend.labels.padding=11;
+Chart.defaults.plugins.legend.labels.font={size:10.5};
+const GC='rgba(255,255,255,0.04)',TC='#5A6680';
+const sc={x:{grid:{color:GC},ticks:{color:TC,font:{size:10.5}}},y:{grid:{color:GC},ticks:{color:TC,font:{size:10.5},callback:v=>v!=null?v.toLocaleString():''}}};
+const MONTHS=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const AGELBLS=['0–15','16–25','26–35','36–45','46–55','56–65','65+'];
+const VHLLBLS=['จักรยานยนต์','รถยนต์','เดินเท้า','บรรทุก/ตู้','จักรยาน','สามล้อ','เกษตร','โดยสาร'];
+const AGECOLS=['#E8294A','#F5A623','#00D4AA','#5B8EBF','#8B5CF6','#C9A84C','#F06292'];
+
+const mkLine=s=>s.map(x=>({label:x.l,data:x.d,borderColor:x.c,backgroundColor:x.bg||'transparent',pointBackgroundColor:x.c,pointRadius:3,pointHoverRadius:5,tension:0.45,fill:true,borderWidth:2}));
+const mkBar=s=>s.map(x=>({label:x.l,data:x.d,backgroundColor:x.c,borderRadius:5}));
+const mkC=(id,type,data,opts)=>new Chart(document.getElementById(id),{type,data,options:opts});
+
+const ovMonthly=mkC('ovMonthly','line',{labels:MONTHS,datasets:mkLine(D.all.mo.s)},{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top'},tooltip:{callbacks:{label:c=>c.parsed.y!=null?` ${c.dataset.label}: ${c.parsed.y.toLocaleString()} ราย`:' ไม่มีข้อมูล'}}},scales:{x:sc.x,y:{...sc.y,min:400}}});
+const ovYearly=mkC('ovYearly','bar',{labels:D.all.yr.lb,datasets:[{label:'ราย',data:D.all.yr.d,backgroundColor:D.all.yr.bg,borderColor:D.all.yr.bc,borderWidth:1.5,borderRadius:10}]},{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.parsed.y.toLocaleString()} ราย`}}},scales:sc});
+const vhBar=mkC('vhBar','bar',{labels:VHLLBLS,datasets:mkBar(D.all.vb.s)},{responsive:true,plugins:{legend:{position:'top'},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y.toLocaleString()} ราย`}}},scales:sc});
+const vhDonut=mkC('vhDonut','doughnut',{labels:['จักรยานยนต์','รถยนต์','คนเดินเท้า','รถบรรทุก/ตู้','อื่นๆ'],datasets:[{data:[23182,2765,1047,678,824],backgroundColor:['#E8294A','#F5A623','#00D4AA','#5B8EBF','#C9A84C'],borderWidth:0,hoverOffset:8}]},{responsive:true,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.parsed.toLocaleString()} ราย`}}}});
+const pvBar=mkC('pvBar','bar',{labels:D.all.pb.lb,datasets:mkBar(D.all.pb.s)},{responsive:true,plugins:{legend:{position:'top'},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y.toLocaleString()} ราย`}}},scales:sc});
+const dmAge=mkC('dmAge','bar',{labels:AGELBLS,datasets:mkBar(D.all.ag.s)},{responsive:true,plugins:{legend:{position:'top'},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y.toLocaleString()} ราย`}}},scales:sc});
+const dmAgePie=mkC('dmAgePie','doughnut',{labels:AGELBLS,datasets:[{data:D.all.ap,backgroundColor:AGECOLS,borderWidth:0,hoverOffset:8}]},{responsive:true,cutout:'52%',plugins:{legend:{position:'right',labels:{font:{size:10},padding:9}},tooltip:{callbacks:{label:c=>` ${c.parsed.toLocaleString()} ราย`}}}});
+
+function set(id,v){const e=document.getElementById(id);if(!e)return;e.classList.remove('num-anim');void e.offsetWidth;e.classList.add('num-anim');e.textContent=v;}
+function pct(a,b){return((a/b)*100).toFixed(1)+'%';}
+
+function renderProv(pv,lid){
+  const e=document.getElementById(lid);if(!e)return;
+  const mx=pv[0].v;
+  e.innerHTML=pv.map((p,i)=>`<div class="prov-row"><span class="prov-name">${i+1}. ${p.n}</span><div class="prov-track"><div class="prov-fill" style="width:${(p.v/mx*100).toFixed(1)}%"></div></div><span class="prov-val">${p.v.toLocaleString()}</span></div>`).join('');
+}
+
+function renderGender(gd,sid){
+  const e=document.getElementById(sid);if(!e)return;
+  e.innerHTML=gd.map(g=>`<div class="gyblock"><div class="gylbl">▸ ${g.yr} · ${g.tot.toLocaleString()} ราย</div><div class="gbrow"><span class="glbl" style="color:#7AACDB">ชาย</span><div class="gtrack"><div class="gfill m" style="width:${g.mp}%"></div></div><span class="gpct m">${g.mp}%</span></div><div class="gbrow"><span class="glbl" style="color:#E8C97A">หญิง</span><div class="gtrack"><div class="gfill f" style="width:${g.fp}%"></div></div><span class="gpct f">${g.fp}%</span></div></div>`).join('');
+}
+
+let curYr='all', curTab='overview';
+
+function applyFilter(yr){
+  curYr=yr;
+  const d=D[yr==='all'?'all':parseInt(yr)];
+  set('phBadge',d.badge);
+  document.getElementById('phSub').textContent=`อุบัติเหตุทางถนน · ${d.note} · ${d.total.toLocaleString()} ราย`;
+
+  // OVERVIEW
+  set('ov-total',d.total.toLocaleString());
+  set('ov-total-s',yr==='all'?'AVG 15,652 ราย/ปี':yr==='2568'?'ข้อมูลบางส่วน':'ข้อมูลเต็มปี');
+  set('ov-moto',d.motoR); set('ov-moto-s',d.moto.toLocaleString()+' ราย');
+  set('ov-male',d.maleR); set('ov-male-s',`ชาย ${d.male.toLocaleString()} · หญิง ${d.female.toLocaleString()}`);
+  ovMonthly.data.datasets=mkLine(d.mo.s);
+  ovMonthly.options.scales.y.min=yr==='2568'?0:400;
+  ovMonthly.update('active');
+  document.getElementById('ov-mtag').textContent=yr==='all'?'2566 vs 2567':yr;
+  document.getElementById('ov-mdesc').textContent=yr==='2568'?'ข้อมูลรายเดือนปี 2568 ยังไม่ครบ':yr==='all'?'ผู้เสียชีวิตรายเดือนเปรียบเทียบ ปี 2566 และ 2567':`ผู้เสียชีวิตรายเดือน ปี ${yr}`;
+  ovYearly.data.labels=d.yr.lb; ovYearly.data.datasets[0].data=d.yr.d;
+  ovYearly.data.datasets[0].backgroundColor=d.yr.bg; ovYearly.data.datasets[0].borderColor=d.yr.bc;
+  ovYearly.update('active');
+
+  // VEHICLE
+  set('vh-moto',d.moto.toLocaleString()); set('vh-moto-s',pct(d.moto,d.spec)+' ของที่ระบุพาหนะ');
+  set('vh-car',d.car.toLocaleString()); set('vh-car-s',pct(d.car,d.spec)+' ของที่ระบุพาหนะ');
+  set('vh-walk',d.walk.toLocaleString()); set('vh-walk-s',pct(d.walk,d.spec)+' ของที่ระบุพาหนะ');
+  set('vh-truck',d.truck.toLocaleString()); set('vh-truck-s',pct(d.truck,d.spec)+' ของที่ระบุพาหนะ');
+  vhBar.data.datasets=mkBar(d.vb.s); vhBar.update('active');
+  vhDonut.data.datasets[0].data=[d.moto,d.car,d.walk,d.truck,d.other]; vhDonut.update('active');
+  const st=d.moto+d.car+d.walk+d.truck+d.other;
+  set('vhDTotal',st.toLocaleString());
+  set('vd-moto',d.moto.toLocaleString()); set('vd-car',d.car.toLocaleString());
+  set('vd-walk',d.walk.toLocaleString()); set('vd-truck',d.truck.toLocaleString()); set('vd-other',d.other.toLocaleString());
+  document.getElementById('vh-btag').textContent=yr==='all'?'ALL YEARS':yr;
+  document.getElementById('vh-dtag').textContent=yr==='all'?'BREAKDOWN':yr;
+  document.getElementById('vh-ddesc').textContent=`เฉพาะรายที่ระบุพาหนะ (${st.toLocaleString()} ราย)`;
+
+  // PROVINCE
+  set('pv-t1',d.pv[0].n.replace('มหานคร','ฯ')); set('pv-t1s',d.pv[0].v.toLocaleString()+' ราย');
+  set('pv-t2',d.pv[1].n.replace('มหานคร','ฯ')); set('pv-t2s',d.pv[1].v.toLocaleString()+' ราย');
+  set('pv-t3',d.pv[2].n); set('pv-t3s',d.pv[2].v.toLocaleString()+' ราย');
+  set('pv-total',d.total.toLocaleString()); set('pv-yrs',yr==='all'?'ปี 2566–2568':`ปี ${yr}`);
+  renderProv(d.pv,'pvList');
+  pvBar.data.labels=d.pb.lb; pvBar.data.datasets=mkBar(d.pb.s); pvBar.update('active');
+  document.getElementById('pv-ltag').textContent=yr==='all'?'RANKING · ALL':`RANKING · ${yr}`;
+  document.getElementById('pv-btag').textContent=yr==='all'?'TOP5 × YEAR':`TOP5 · ${yr}`;
+  document.getElementById('pv-ldesc').textContent=yr==='all'?'จำแนกตามจังหวัดเกิดเหตุ รวม 3 ปี':`จำแนกตามจังหวัดเกิดเหตุ ปี ${yr}`;
+
+  // DEMO
+  set('dm-male',d.maleR); set('dm-males',d.male.toLocaleString()+' ราย');
+  const peakIdx=d.ap.indexOf(Math.max(...d.ap));
+  set('dm-peak',AGELBLS[peakIdx]); set('dm-peaks',d.ap[peakIdx].toLocaleString()+' ราย');
+  set('dm-eld',d.ap[6].toLocaleString());
+  set('dm-elds',yr==='all'?'รวมทุกปี':`ปี ${yr}`);
+  dmAge.data.datasets=mkBar(d.ag.s); dmAge.update('active');
+  dmAgePie.data.datasets[0].data=d.ap; dmAgePie.update('active');
+  renderGender(d.gd,'dmGender');
+  document.getElementById('dm-atag').textContent=yr==='all'?'AGE · ALL':`AGE · ${yr}`;
+  document.getElementById('dm-aptag').textContent=yr==='all'?'AGE PIE · ALL':`PIE · ${yr}`;
+  document.getElementById('dm-apdesc').textContent=yr==='all'?'สัดส่วนผู้เสียชีวิตจำแนกตามกลุ่มอายุ':`สัดส่วนกลุ่มอายุ ปี ${yr}`;
+  document.getElementById('dm-gtag').textContent=yr==='all'?'GENDER · ALL':`GENDER · ${yr}`;
+}
+
+const tabMeta={overview:{ic:'📊',t:'ภาพรวมสถานการณ์'},vehicle:{ic:'🏍',t:'วิเคราะห์พาหนะ'},province:{ic:'📍',t:'วิเคราะห์จังหวัด'},demo:{ic:'👥',t:'ข้อมูลประชากร'}};
+
+document.querySelectorAll('.ntab').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const tab=b.dataset.tab; curTab=tab;
+    document.querySelectorAll('.ntab').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.querySelectorAll('.tab-view').forEach(v=>v.classList.remove('active'));
+    document.getElementById('tab-'+tab).classList.add('active');
+    const m=tabMeta[tab];
+    document.getElementById('phIcon').textContent=m.ic;
+    document.getElementById('phTitle').textContent=m.t;
+    const d=D[curYr==='all'?'all':parseInt(curYr)];
+    document.getElementById('phSub').textContent=`อุบัติเหตุทางถนน · ${d.note} · ${d.total.toLocaleString()} ราย`;
+  });
+});
+
+document.querySelectorAll('.yr-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.yr-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    applyFilter(b.dataset.yr);
+  });
+});
+
+renderProv(D.all.pv,'pvList');
+renderGender(D.all.gd,'dmGender');
+applyFilter('all');
+</script>
+</body>
+</html>
